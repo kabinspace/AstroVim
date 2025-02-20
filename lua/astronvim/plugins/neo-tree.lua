@@ -26,7 +26,7 @@ return {
               if package.loaded["neo-tree"] then
                 return true
               else
-                local stats = (vim.uv or vim.loop).fs_stat(vim.api.nvim_buf_get_name(0)) -- TODO: REMOVE vim.loop WHEN DROPPING SUPPORT FOR Neovim v0.9
+                local stats = vim.uv.fs_stat(vim.api.nvim_buf_get_name(0))
                 if stats and stats.type == "directory" then
                   require("lazy").load { plugins = { "neo-tree.nvim" } }
                   return true
@@ -106,10 +106,7 @@ return {
         },
       },
       commands = {
-        system_open = function(state)
-          -- TODO: remove deprecated method check after dropping support for neovim v0.9
-          (vim.ui.open or astro.system_open)(state.tree:get_node():get_id())
-        end,
+        system_open = function(state) vim.ui.open(state.tree:get_node():get_id()) end,
         parent_or_close = function(state)
           local node = state.tree:get_node()
           if node:has_children() and node:is_expanded() then
@@ -201,33 +198,6 @@ return {
         vim.opt_local.foldcolumn = "0"
       end,
     })
-
-    if astro.is_available "telescope.nvim" then
-      opts.commands.find_in_dir = function(state)
-        local node = state.tree:get_node()
-        local path = node.type == "file" and node:get_parent_id() or node:get_id()
-        require("telescope.builtin").find_files { cwd = path }
-      end
-      opts.window.mappings.F = "find_in_dir"
-    end
-
-    if astro.is_available "toggleterm.nvim" then
-      local function toggleterm_in_direction(state, direction)
-        local node = state.tree:get_node()
-        local path = node.type == "file" and node:get_parent_id() or node:get_id()
-        require("toggleterm.terminal").Terminal:new({ dir = path, direction = direction }):toggle()
-      end
-      local prefix = "T"
-      ---@diagnostic disable-next-line: assign-type-mismatch
-      opts.window.mappings[prefix] =
-        { "show_help", nowait = false, config = { title = "New Terminal", prefix_key = prefix } }
-      for suffix, direction in pairs { f = "float", h = "horizontal", v = "vertical" } do
-        local command = "toggleterm_" .. direction
-        opts.commands[command] = function(state) toggleterm_in_direction(state, direction) end
-        opts.window.mappings[prefix .. suffix] = command
-      end
-    end
-
     return opts
   end,
 }

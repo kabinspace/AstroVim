@@ -16,12 +16,12 @@ return {
       "williamboman/mason-lspconfig.nvim",
       dependencies = { "williamboman/mason.nvim" },
       cmd = { "LspInstall", "LspUninstall" },
-      init = function(plugin) require("astrocore").on_load("mason.nvim", plugin.name) end,
       opts_extend = { "ensure_installed" },
       opts = {
         ensure_installed = {},
         handlers = { function(server) require("astrolsp").lsp_setup(server) end },
       },
+      config = function(...) require "astronvim.plugins.configs.mason-lspconfig"(...) end,
     },
   },
   cmd = function(_, cmds) -- HACK: lazy load lspconfig on `:Neoconf` if neoconf is available

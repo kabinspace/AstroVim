@@ -3,23 +3,17 @@ return {
   ft = "lua",
   cmd = "LazyDev",
   opts_extend = { "library" },
-  opts = function(_, opts)
-    opts.library = {
+  opts = {
+    library = {
       { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       { path = "lazy.nvim", words = { "Lazy" } },
       { path = "astrocore", words = { "AstroCore" } },
       { path = "astrolsp", words = { "AstroLSP" } },
       { path = "astroui", words = { "AstroUI" } },
       { path = "astrotheme", words = { "AstroTheme" } },
-    }
-    if vim.fn.has "nvim-0.10" ~= 1 then
-      require("lazydev.config").have_0_10 = true -- force lazydev in 0.9
-      table.insert(opts.library, { "neodev.nvim/types/stable" })
-    end
-  end,
+    },
+  },
   specs = {
-    -- TODO: remove neodev when dropping 0.9 support
-    { "folke/neodev.nvim", enabled = vim.fn.has "nvim-0.10" ~= 1, lazy = true, config = function() end },
     {
       "hrsh7th/nvim-cmp",
       optional = true,

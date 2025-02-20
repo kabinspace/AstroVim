@@ -1,43 +1,78 @@
 return {
   "AstroNvim/astrolsp",
   lazy = true,
-  opts_extend = { "servers" },
-  opts = function(_, opts)
-    return require("astrocore").extend_tbl(opts, {
-      features = {
-        codelens = true,
-        inlay_hints = false,
-        semantic_tokens = true,
+  ---@type AstroLSPOpts
+  opts = {
+    features = {
+      codelens = true,
+      inlay_hints = false,
+      semantic_tokens = true,
+    },
+    capabilities = vim.lsp.protocol.make_client_capabilities(),
+    ---@diagnostic disable-next-line: missing-fields
+    config = {},
+    defaults = {
+      hover = {
+        border = "rounded",
+        silent = true,
       },
-      capabilities = vim.lsp.protocol.make_client_capabilities(),
-      ---@diagnostic disable-next-line: missing-fields
-      config = { lua_ls = { settings = { Lua = { workspace = { checkThirdParty = false } } } } },
-      file_operations = {
-        timeout = 10000,
-        operations = {
-          didCreate = false,
-          didDelete = false,
-          didRename = false,
-          willCreate = false,
-          willDelete = false,
-          willRename = false,
+      signature_help = {
+        border = "rounded",
+        silent = true,
+        focusable = false,
+      },
+    },
+    file_operations = {
+      timeout = 10000,
+      operations = {
+        didCreate = true,
+        didDelete = true,
+        didRename = true,
+        willCreate = true,
+        willDelete = true,
+        willRename = true,
+      },
+    },
+    flags = {},
+    formatting = { format_on_save = { enabled = true }, disabled = {} },
+    handlers = { function(server, server_opts) require("lspconfig")[server].setup(server_opts) end },
+    servers = {},
+    on_attach = nil,
+  },
+  specs = {
+    {
+      "AstroNvim/astrocore",
+      ---@type AstroCoreOpts
+      opts = {
+        autocmds = {
+          astrolsp_createfiles_events = {
+            {
+              event = "BufWritePre",
+              desc = "trigger willCreateFiles before writing a new file",
+              callback = function(args)
+                local filename = require("astrocore.buffer").is_valid(args.buf)
+                  and vim.fn.expand("#" .. args.buf .. ":p")
+                if filename and not vim.uv.fs_stat(filename) then
+                  vim.b[args.buf].new_file = filename
+                  require("astrolsp.file_operations").willCreateFiles(filename)
+                end
+              end,
+            },
+            {
+              event = "BufWritePost",
+              desc = "trigger didCreateFiles after writing a new file",
+              callback = function(args)
+                local filename = vim.b[args.buf].new_file
+                if filename then
+                  vim.b[args.buf].new_file = false
+                  require("astrolsp.file_operations").didCreateFiles(filename)
+                end
+              end,
+            },
+          },
         },
       },
-      flags = {},
-      formatting = { format_on_save = { enabled = true }, disabled = {} },
-      handlers = { function(server, server_opts) require("lspconfig")[server].setup(server_opts) end },
-      lsp_handlers = {
-        ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded", silent = true }),
-        ["textDocument/signatureHelp"] = vim.lsp.with(
-          vim.lsp.handlers.signature_help,
-          { border = "rounded", silent = true, focusable = false }
-        ),
-      },
-      servers = {},
-      on_attach = nil,
-    } --[[@as AstroLSPOpts]])
-  end,
-  specs = {
+    },
     {
       "nvim-neo-tree/neo-tree.nvim",
       optional = true,

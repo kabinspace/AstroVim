@@ -20,11 +20,11 @@ return {
       "jay-babu/mason-null-ls.nvim",
       dependencies = { "williamboman/mason.nvim" },
       cmd = { "NullLsInstall", "NullLsUninstall" },
-      init = function(plugin) require("astrocore").on_load("mason.nvim", plugin.name) end,
       opts_extend = { "ensure_installed" },
       opts = { ensure_installed = {}, handlers = {} },
+      config = function(...) require "astronvim.plugins.configs.mason-null-ls"(...) end,
     },
   },
   event = "User AstroFile",
-  opts = function() return { on_attach = require("astrolsp").on_attach } end,
+  opts = function(_, opts) opts.on_attach = require("astrolsp").on_attach end,
 }

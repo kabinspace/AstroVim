@@ -50,7 +50,7 @@ function M.notify(message, level, opts)
 end
 
 --- Set `vim.notify` to extend it to be pause-able
----@param notify function|notify? the original notification function (defaults to `vim.notify`)
+---@param notify? function|notify the original notification function (defaults to `vim.notify`)
 function M.setup(notify)
   if not notify then notify = vim.notify end
   assert(notify ~= M.notify, "vim.notify is already setup")
@@ -68,8 +68,7 @@ function M.defer_startup()
   M.pause()
 
   -- defer initially for 500ms or until `vim.notify` changes
-  local uv = vim.uv or vim.loop
-  local timer, checker = uv.new_timer(), uv.new_check()
+  local timer, checker = vim.uv.new_timer(), vim.uv.new_check()
 
   local function replay()
     timer:stop()

@@ -51,6 +51,30 @@ return {
         maps.i["<C-'>"] = { "<Esc><Cmd>ToggleTerm<CR>", desc = "Toggle terminal" } -- requires terminal that supports binding <C-'>
       end,
     },
+    {
+      "nvim-neo-tree/neo-tree.nvim",
+      optional = true,
+      opts = function(_, opts)
+        if not opts.commands then opts.commands = {} end
+        if not opts.window then opts.window = {} end
+        if not opts.window.mappings then opts.window.mappings = {} end
+
+        local function toggleterm_in_direction(state, direction)
+          local node = state.tree:get_node()
+          local path = node.type == "file" and node:get_parent_id() or node:get_id()
+          require("toggleterm.terminal").Terminal:new({ dir = path, direction = direction }):toggle()
+        end
+        local prefix = "T"
+        ---@diagnostic disable-next-line: assign-type-mismatch
+        opts.window.mappings[prefix] =
+          { "show_help", nowait = false, config = { title = "New Terminal", prefix_key = prefix } }
+        for suffix, direction in pairs { f = "float", h = "horizontal", v = "vertical" } do
+          local command = "toggleterm_" .. direction
+          opts.commands[command] = function(state) toggleterm_in_direction(state, direction) end
+          opts.window.mappings[prefix .. suffix] = command
+        end
+      end,
+    },
   },
   opts = {
     highlights = {

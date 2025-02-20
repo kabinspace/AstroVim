@@ -60,10 +60,10 @@ return {
     {
       "jay-babu/mason-nvim-dap.nvim",
       dependencies = { "nvim-dap", "williamboman/mason.nvim" },
-      init = function(plugin) require("astrocore").on_load("mason.nvim", plugin.name) end,
       cmd = { "DapInstall", "DapUninstall" },
       opts_extend = { "ensure_installed" },
       opts = { ensure_installed = {}, handlers = {} },
+      config = function(...) require "astronvim.plugins.configs.mason-nvim-dap"(...) end,
     },
     {
       "rcarriga/nvim-dap-ui",

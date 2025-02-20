@@ -50,7 +50,7 @@ return {
               [vim.diagnostic.severity.INFO] = get_icon "DiagnosticInfo",
             },
           },
-          update_in_insert = true,
+          update_in_insert = false,
           underline = true,
           severity_sort = true,
           float = {
@@ -85,5 +85,6 @@ return {
         },
       } --[[@as AstroCoreOpts]])
     end,
+    config = function(...) require "astronvim.plugins.configs.astrocore"(...) end,
   },
 }

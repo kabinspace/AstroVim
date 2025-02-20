@@ -30,11 +30,11 @@ return {
     pcall(require, "nvim-treesitter.query_predicates")
   end,
   opts_extend = { "ensure_installed" },
-  opts = function()
-    if require("astrocore").is_available "mason.nvim" then require("lazy").load { plugins = { "mason.nvim" } } end
-    return {
+  opts = function(_, opts)
+    local astrocore = require "astrocore"
+    if astrocore.is_available "mason.nvim" then require("lazy").load { plugins = { "mason.nvim" } } end
+    opts = astrocore.extend_tbl(opts, {
       auto_install = vim.fn.executable "git" == 1 and vim.fn.executable "tree-sitter" == 1, -- only enable auto install if `tree-sitter` cli is installed
-      ensure_installed = { "bash", "c", "lua", "markdown", "markdown_inline", "python", "query", "vim", "vimdoc" },
       highlight = { enable = true },
       incremental_selection = { enable = true },
       indent = { enable = true },
@@ -95,7 +95,14 @@ return {
           },
         },
       },
-    }
+    })
+    if opts.ensure_installed ~= "all" then
+      opts.ensure_installed = astrocore.list_insert_unique(
+        opts.ensure_installed,
+        { "bash", "c", "lua", "markdown", "markdown_inline", "python", "query", "vim", "vimdoc" }
+      )
+    end
+    return opts
   end,
   config = function(...) require "astronvim.plugins.configs.nvim-treesitter"(...) end,
 }

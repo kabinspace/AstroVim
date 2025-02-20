@@ -52,7 +52,7 @@ return {
     },
     event = "InsertEnter",
     opts_extend = { "sources" },
-    opts = function()
+    opts = function(_, opts)
       local cmp, astro = require "cmp", require "astrocore"
 
       local sources = {}
@@ -89,25 +89,15 @@ return {
         return item
       end
 
-      ---TODO: Remove this block in AstroNvim v5, this is here for backwards compatibility
-      local lspkind_opts = astro.plugin_opts "lspkind.nvim"
-      local lspkind_mode = vim.tbl_get(lspkind_opts, "mode")
-      if -- check for user intervention on lspkind settings for `cmp_format`
-        (lspkind_mode and lspkind_mode ~= "symbol")
-        or vim.tbl_get(lspkind_opts, "maxwidth")
-        or vim.tbl_get(lspkind_opts, "before")
-        or vim.tbl_get(lspkind_opts, "show_labelDetails")
-      then
-        local lspkind_avail, lspkind = pcall(require, "lspkind")
-        -- if there is user configuration for `lspkind`s cmp formatting just use that format function
-        if lspkind_avail then format = lspkind.cmp_format(require("astrocore").plugin_opts "lspkind.nvim") end
-      end
-
-      return {
+      return astro.extend_tbl(opts, {
         enabled = function()
+          -- Disable completion when recording macros
+          if vim.fn.reg_recording() ~= "" or vim.fn.reg_executing() ~= "" then return false end
+          -- Disable completion for prompt windows that are not `nvim-dap` prompts
           local dap_prompt = astro.is_available "cmp-dap" -- add interoperability with cmp-dap
             and vim.tbl_contains({ "dap-repl", "dapui_watches", "dapui_hover" }, vim.bo[0].filetype)
           if vim.bo[0].buftype == "prompt" and not dap_prompt then return false end
+          -- Disable completion when disabled in AstroNvim
           return vim.F.if_nil(vim.b.cmp_enabled, astro.config.features.cmp)
         end,
         preselect = cmp.PreselectMode.None,
@@ -175,7 +165,7 @@ return {
           end, { "i", "s" }),
         },
         sources = sources,
-      }
+      })
     end,
     config = function(...) require "astronvim.plugins.configs.cmp"(...) end,
   },

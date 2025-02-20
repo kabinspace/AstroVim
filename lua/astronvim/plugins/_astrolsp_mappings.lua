@@ -2,6 +2,7 @@ return {
   "AstroNvim/astrolsp",
   ---@param opts AstroLSPOpts
   opts = function(_, opts)
+    ---@type AstroLSPMappings
     local maps = require("astrocore").empty_map_table()
     maps.n["<Leader>l"] = { desc = require("astroui").get_icon("ActiveLSP", 1, true) .. "Language Tools" }
     maps.v["<Leader>l"] = { desc = require("astroui").get_icon("ActiveLSP", 1, true) .. "Language Tools" }
@@ -70,17 +71,6 @@ return {
       function() require("astrolsp.toggles").signature_help() end,
       desc = "Toggle automatic signature help",
       cond = "textDocument/signatureHelp",
-    }
-
-    -- TODO: Remove mapping after dropping support for Neovim v0.9, it's automatic
-    if vim.fn.has "nvim-0.10" == 0 then
-      maps.n["K"] = { function() vim.lsp.buf.hover() end, desc = "Hover symbol details", cond = "textDocument/hover" }
-    end
-
-    maps.n["gI"] = {
-      function() vim.lsp.buf.implementation() end,
-      desc = "Implementation of current symbol",
-      cond = "textDocument/implementation",
     }
 
     maps.n["<Leader>uh"] = {

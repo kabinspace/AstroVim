@@ -2,9 +2,9 @@ return {
   "lewis6991/gitsigns.nvim",
   enabled = vim.fn.executable "git" == 1,
   event = "User AstroGitFile",
-  opts = function()
-    local get_icon = require("astroui").get_icon
-    return {
+  opts = function(_, opts)
+    local astrocore, get_icon = require "astrocore", require("astroui").get_icon
+    return astrocore.extend_tbl(opts, {
       signs = {
         add = { text = get_icon "GitSign" },
         change = { text = get_icon "GitSign" },
@@ -14,7 +14,6 @@ return {
         untracked = { text = get_icon "GitSign" },
       },
       on_attach = function(bufnr)
-        local astrocore = require "astrocore"
         local prefix, maps = "<Leader>g", astrocore.empty_map_table()
         for _, mode in ipairs { "n", "v" } do
           maps[mode][prefix] = { desc = get_icon("Git", 1, true) .. "Git" }
@@ -30,13 +29,12 @@ return {
           desc = "Reset Git hunk",
         }
         maps.n[prefix .. "R"] = { function() require("gitsigns").reset_buffer() end, desc = "Reset Git buffer" }
-        maps.n[prefix .. "s"] = { function() require("gitsigns").stage_hunk() end, desc = "Stage Git hunk" }
+        maps.n[prefix .. "s"] = { function() require("gitsigns").stage_hunk() end, desc = "Stage/Unstage Git hunk" }
         maps.v[prefix .. "s"] = {
           function() require("gitsigns").stage_hunk { vim.fn.line ".", vim.fn.line "v" } end,
           desc = "Stage Git hunk",
         }
         maps.n[prefix .. "S"] = { function() require("gitsigns").stage_buffer() end, desc = "Stage Git buffer" }
-        maps.n[prefix .. "u"] = { function() require("gitsigns").undo_stage_hunk() end, desc = "Unstage Git hunk" }
         maps.n[prefix .. "d"] = { function() require("gitsigns").diffthis() end, desc = "View Git diff" }
 
         maps.n["[G"] = { function() require("gitsigns").nav_hunk "first" end, desc = "First Git hunk" }
@@ -49,7 +47,7 @@ return {
 
         astrocore.set_mappings(maps, { buffer = bufnr })
       end,
-      worktrees = require("astrocore").config.git_worktrees,
-    }
+      worktrees = astrocore.config.git_worktrees,
+    })
   end,
 }

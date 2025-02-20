@@ -10,8 +10,8 @@ return {
       end,
     },
   },
-  opts = function()
-    local opts = {
+  opts = function(_, opts)
+    opts = require("astrocore").extend_tbl(opts, {
       attach_mode = "global",
       backends = { "lsp", "treesitter", "markdown", "man" },
       layout = { min_width = 28 },
@@ -44,7 +44,7 @@ return {
           },
         }, { buffer = bufnr })
       end,
-    }
+    })
 
     local large_buf = vim.tbl_get(require("astrocore").config, "features", "large_buf")
     if large_buf then

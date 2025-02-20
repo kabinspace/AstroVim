@@ -1,6 +1,8 @@
+-- TODO: Remove when dropping support for Neovim v0.10
 return {
   "kevinhwang91/nvim-ufo",
   event = { "User AstroFile", "InsertEnter" },
+  enabled = vim.fn.has "nvim-0.11" ~= 1,
   specs = {
     {
       "AstroNvim/astrocore",
@@ -11,6 +13,13 @@ return {
         maps.n["zr"] = { function() require("ufo").openFoldsExceptKinds() end, desc = "Fold less" }
         maps.n["zm"] = { function() require("ufo").closeFoldsWith() end, desc = "Fold more" }
         maps.n["zp"] = { function() require("ufo").peekFoldedLinesUnderCursor() end, desc = "Peek fold" }
+
+        local opt = opts.options.opt
+        opt.foldcolumn = "1"
+        opt.foldexpr = "0"
+        opt.foldenable = true
+        opt.foldlevel = 99
+        opt.foldlevelstart = 99
       end,
     },
     {
